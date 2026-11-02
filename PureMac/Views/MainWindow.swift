@@ -50,7 +50,9 @@ struct MainWindow: View {
             selectSection(.apps)
             appState.pendingExternalApp = nil
         }
+        .onChange(of: appState.smartScanRequested) { _ in startRequestedSmartScan() }
         .onAppear {
+            startRequestedSmartScan()
             if appState.pendingExternalApp != nil {
                 selectSection(.apps)
                 appState.pendingExternalApp = nil
@@ -310,6 +312,13 @@ struct MainWindow: View {
         }
         sections.append(.settings)
         return sections
+    }
+
+    private func startRequestedSmartScan() {
+        guard appState.smartScanRequested else { return }
+        appState.smartScanRequested = false
+        selectSection(.cleaning(.smartScan))
+        appState.startSmartScan()
     }
 
     private func selectSection(_ section: AppSection) {
