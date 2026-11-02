@@ -51,7 +51,6 @@ final class ScanProgressTicker: ObservableObject {
 final class AppState: ObservableObject {
     let languageAtLaunch = AppLanguage.current
     @Published var settingsNeedLanguageRestart = false
-    @Published var showUpdateSettings = false
     @Published var deviceBackupRemovalInProgress = false
     @Published var deviceBackupRemovalResult: DeviceBackupRemovalResult?
     var canRemoveDeviceBackups: Bool {

@@ -118,15 +118,6 @@ struct PureMacApp: App {
         .defaultSize(width: 1120, height: 740)
         .commands {
             CommandGroup(replacing: .newItem) {}
-            CommandMenu("Updates") {
-                Button("Check for Updates") {
-                    appState.showUpdateSettings = true
-                    WindowOpener.shared.showMainWindow()
-                    NSApp.activate(ignoringOtherApps: true)
-                    UpdateService.shared.checkForUpdates()
-                }
-                .keyboardShortcut("u", modifiers: [.command, .shift])
-            }
         }
 
         Settings {

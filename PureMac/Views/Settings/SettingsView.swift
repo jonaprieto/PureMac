@@ -3,7 +3,6 @@ import SwiftUI
 import ServiceManagement
 
 struct SettingsView: View {
-    @EnvironmentObject private var appState: AppState
     /// The dedicated macOS Settings window owns its permission sheet. The main
     /// window already presents the shared coordinator's sheet for every page.
     var standalone = false
@@ -14,7 +13,7 @@ struct SettingsView: View {
         case general = "General"
         case cleaning = "Cleaning"
         case schedule = "Schedule"
-        case about = "Updates"
+        case about = "About"
 
         var id: String { rawValue }
         var icon: String {
@@ -22,7 +21,7 @@ struct SettingsView: View {
             case .general: return "slider.horizontal.3"
             case .cleaning: return "trash"
             case .schedule: return "clock"
-            case .about: return "arrow.triangle.2.circlepath"
+            case .about: return "info.circle"
             }
         }
     }
@@ -43,8 +42,8 @@ struct SettingsView: View {
                     }
                     Spacer()
                     VStack(alignment: .trailing, spacing: 3) {
-                        Text(String(format: String(localized: "Version %@"), UpdateService.installedVersion))
-                        Text(String(format: String(localized: "Build %@"), UpdateService.installedBuild))
+                        Text(String(format: String(localized: "Version %@"), AppConstants.appVersion))
+                        Text(String(format: String(localized: "Build %@"), AppConstants.appBuild))
                             .foregroundStyle(.tertiary)
                     }
                     .font(.system(size: 11))
@@ -80,19 +79,10 @@ struct SettingsView: View {
         .background(AmbientBackdrop())
         .tint(Tint.accent)
         .navigationTitle("Settings")
-        .onAppear { showRequestedUpdates() }
-        .onChange(of: appState.showUpdateSettings) { _ in showRequestedUpdates() }
         .sheet(isPresented: Binding(
             get: { standalone && permission.isRequesting && permission.presentation == .settingsWindow },
             set: { if !$0 && standalone && permission.presentation == .settingsWindow { permission.dismiss(callRetry: false) } }
         )) { PermissionSheet() }
-    }
-
-    private func showRequestedUpdates() {
-        if !standalone && appState.showUpdateSettings {
-            selectedTab = .about
-            appState.showUpdateSettings = false
-        }
     }
 }
 
@@ -484,7 +474,7 @@ struct AboutSettingsView: View {
                         Text(
                             String(
                                 format: String(localized: "Version %@"),
-                                UpdateService.installedVersion
+                                AppConstants.appVersion
                             )
                         )
                             .foregroundStyle(.secondary)
@@ -495,13 +485,8 @@ struct AboutSettingsView: View {
                 }
             }
 
-            Section("Updates") {
-                AppUpdateSettingsView()
-            }
-
             Section {
-                Link("GitHub Repository", destination: URL(string: "https://github.com/momenbasel/PureMac")!)
-                Link("Report an Issue", destination: URL(string: "https://github.com/momenbasel/PureMac/issues")!)
+                Link("GitHub Repository", destination: URL(string: "https://github.com/jonaprieto/PureMac")!)
             }
 
             Section {
