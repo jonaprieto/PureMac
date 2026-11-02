@@ -81,6 +81,22 @@ final class ProcessResourceMonitorTests: XCTestCase {
         XCTAssertEqual(ProcessResourceMath.changedProcessCount(readings: [reading(pid: 2, start: 101)], previous: previous), 3)
     }
 
+    func testHeaviestOffersOnlyQuittableAppsHeaviestFirst() {
+        func consumer(_ name: String, path: String?, bytes: UInt64) -> ProcessResourceConsumer {
+            ProcessResourceConsumer(id: name, name: name, applicationPath: path, cpuFraction: nil, residentBytes: bytes, processCount: 1)
+        }
+        let consumers = [
+            consumer("small", path: "/A.app", bytes: 1),
+            consumer("daemon", path: nil, bytes: 99),
+            consumer("agent", path: "/Agent.app", bytes: 50),
+            consumer("big", path: "/B.app", bytes: 9)
+        ]
+
+        let apps = ProcessResourceMath.heaviest(consumers, by: .memory, quittablePaths: ["/A.app", "/B.app"])
+        XCTAssertEqual(apps.map(\.name), ["big", "small"])
+        XCTAssertEqual(ProcessResourceMath.heaviest(consumers, by: .memory, quittablePaths: ["/A.app", "/B.app"], limit: 1).map(\.name), ["big"])
+    }
+
     func testSortingAndSearchKeepMeasuredConsumersFirstAndUseStableTies() {
         let a = ProcessResourceConsumer(id: "a", name: "Browser", applicationPath: nil, cpuFraction: 0.5, residentBytes: 100, processCount: 1)
         let b = ProcessResourceConsumer(id: "b", name: "Editor", applicationPath: nil, cpuFraction: 0.1, residentBytes: 500, processCount: 1)

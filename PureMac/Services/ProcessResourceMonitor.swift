@@ -109,6 +109,10 @@ enum ProcessResourceMath {
             return comparison == .orderedSame ? $0.id < $1.id : comparison == .orderedAscending
         }
     }
+
+    static func heaviest(_ consumers: [ProcessResourceConsumer], by sort: ProcessResourceSort, quittablePaths: Set<String>, limit: Int = 5) -> [ProcessResourceConsumer] {
+        Array(sorted(consumers, by: sort).filter { $0.applicationPath.map(quittablePaths.contains) ?? false }.prefix(limit))
+    }
 }
 
 private struct ProcessResourceSample: Sendable {

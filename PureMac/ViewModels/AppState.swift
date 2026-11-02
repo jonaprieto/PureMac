@@ -23,6 +23,8 @@ extension Notification.Name {
     /// Posted by the Finder Services handler ("Uninstall with PureMac") with a
     /// `["path": String]` userInfo pointing at the right-clicked .app bundle.
     static let pureMacExternalUninstall = Notification.Name("PureMac.ExternalUninstall")
+    /// Posted by the menu-bar monitor's Clean button.
+    static let pureMacSmartScanRequest = Notification.Name("PureMac.SmartScanRequest")
 }
 
 /// Cold-launch buffer for Finder Services. A "Uninstall with PureMac" request
@@ -128,8 +130,12 @@ final class AppState: ObservableObject {
     /// lands before MainWindow mounts (cold launch, or while onboarding is
     /// still showing) is still surfaced — a one-shot token would be missed.
     @Published var pendingExternalApp: InstalledApp?
+    /// Held here because the main window that acts on it may not be open yet.
+    @Published var smartScanRequested = false
 
     private var externalUninstallObserver: AnyCancellable?
+
+    private var smartScanObserver: AnyCancellable?
     private var appFileScanGeneration = UUID()
 
     // MARK: - Services
@@ -188,6 +194,12 @@ final class AppState: ObservableObject {
                 ExternalUninstallBuffer.pendingPath = nil
                 guard let path else { return }
                 Task { @MainActor in self?.presentExternalUninstall(appPath: path) }
+            }
+        smartScanObserver = NotificationCenter.default
+            .publisher(for: .pureMacSmartScanRequest)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                Task { @MainActor in self?.smartScanRequested = true }
             }
         // Drain a request that arrived before this AppState existed (cold launch
         // via Finder Services — the notification fired with no subscriber).
