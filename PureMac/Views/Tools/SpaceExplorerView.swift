@@ -15,6 +15,7 @@ final class SpaceExplorerViewModel: ObservableObject {
     @Published private(set) var result: StorageScanResult?
     @Published private(set) var progress: StorageScanProgress?
     @Published private(set) var path: [URL] = []
+    @Published var removalError: String?
 
     private let explorer: StorageExplorer
     private var scanTask: Task<Void, Never>?
@@ -77,6 +78,17 @@ final class SpaceExplorerViewModel: ObservableObject {
         NSWorkspace.shared.activateFileViewerSelecting([url])
     }
 
+    func moveToTrash(_ entry: StorageEntry) {
+        Task { [explorer] in
+            do {
+                try await explorer.moveToTrash(entry)
+                result = result?.removing(entry)
+            } catch {
+                removalError = error.localizedDescription
+            }
+        }
+    }
+
     private func startScan(at url: URL) {
         scanTask?.cancel()
         let id = UUID()
@@ -118,6 +130,7 @@ final class SpaceExplorerViewModel: ObservableObject {
 
 struct SpaceExplorerView: View {
     @StateObject private var model = SpaceExplorerViewModel()
+    @State private var pendingRemoval: StorageEntry?
 
     var body: some View {
         VStack(spacing: 14) {
@@ -133,6 +146,30 @@ struct SpaceExplorerView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(nsColor: .windowBackgroundColor))
         .navigationTitle("Space Explorer")
+        .confirmationDialog(
+            "Move to Trash?",
+            isPresented: Binding(
+                get: { pendingRemoval != nil },
+                set: { if !$0 { pendingRemoval = nil } }
+            ),
+            titleVisibility: .visible,
+            presenting: pendingRemoval
+        ) { entry in
+            Button("Move to Trash", role: .destructive) {
+                model.moveToTrash(entry)
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { entry in
+            Text("\(entry.name) (\(Self.format(entry.allocatedSize))) will be moved to Trash. Its space is freed when the Trash is emptied.")
+        }
+        .alert("Couldn't move to Trash", isPresented: Binding(
+            get: { model.removalError != nil },
+            set: { if !$0 { model.removalError = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(model.removalError ?? "")
+        }
         .onDisappear {
             model.cancel()
         }
@@ -145,7 +182,7 @@ struct SpaceExplorerView: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text("Space Explorer")
                     .font(.system(size: 24, weight: .bold))
-                Text("Inspect a folder by allocated disk space. Your files are never changed.")
+                Text("Inspect a folder by allocated disk space. Nothing is removed unless you choose to.")
                     .font(.system(size: 12.5))
                     .foregroundStyle(.secondary)
             }
@@ -330,7 +367,8 @@ struct SpaceExplorerView: View {
                             entry: entry,
                             totalSize: result.totalAllocatedSize,
                             onOpen: { model.open(entry) },
-                            onReveal: { model.reveal(entry.url) }
+                            onReveal: { model.reveal(entry.url) },
+                            onRemove: { pendingRemoval = entry }
                         )
                     }
                 }
@@ -406,6 +444,7 @@ private struct StorageEntryRow: View {
     let totalSize: Int64
     let onOpen: () -> Void
     let onReveal: () -> Void
+    let onRemove: () -> Void
 
     var body: some View {
         CardSurface(padding: 12, elevation: .flat) {
@@ -429,6 +468,14 @@ private struct StorageEntryRow: View {
                 .buttonStyle(.borderless)
                 .help("Show in Finder")
                 .accessibilityLabel("Show \(entry.name) in Finder")
+
+                Button(role: .destructive, action: onRemove) {
+                    Image(systemName: "trash")
+                        .frame(width: 24, height: 24)
+                }
+                .buttonStyle(.borderless)
+                .help("Move to Trash")
+                .accessibilityLabel("Move \(entry.name) to Trash")
             }
         }
         .contextMenu {
@@ -436,6 +483,8 @@ private struct StorageEntryRow: View {
                 Button("Open Folder", action: onOpen)
             }
             Button("Show in Finder", action: onReveal)
+            Divider()
+            Button("Move to Trash", role: .destructive, action: onRemove)
         }
     }
 
