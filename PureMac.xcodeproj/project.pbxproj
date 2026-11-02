@@ -16,14 +16,12 @@
 		20E0D6D821D0D1BFAC82E6E4 /* MonitoringLifecycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0621A14395DCA19EC2995842 /* MonitoringLifecycleTests.swift */; };
 		2253F11BDF561B617439C96B /* FullDiskAccessManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E866A1541D289C69144A5E62 /* FullDiskAccessManager.swift */; };
 		25E2304A3FF257F1740E304B /* FileProtection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7953B398E47A4C603DE287F1 /* FileProtection.swift */; };
-		27673871ECFD189E98548956 /* UpdateServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90D25BB11E61105B8764009E /* UpdateServiceTests.swift */; };
 		27F449EDD1B082FE11FEC9DF /* SchedulerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28181F034530331A550C6A3D /* SchedulerService.swift */; };
 		2BCDC53C5E3AB58442C8E4B0 /* CleaningEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B679C0120F1E3DDCB27FE2 /* CleaningEngineTests.swift */; };
 		2C3AD1E4511D0F07C8C7C9D1 /* DeviceBackupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D7ABF3991A1C11BC5728FC6 /* DeviceBackupService.swift */; };
 		30D4A73B94B245DB4EB21B6B /* AppleStorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F9E767232924C819946DAAC /* AppleStorageService.swift */; };
 		340E424F759ACCDE7372F99F /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5ADDC35F31E40780FB5D017 /* Theme.swift */; };
 		39BEE5E2BEC526CCADFC9DDD /* ServicesMenu.strings in Resources */ = {isa = PBXBuildFile; fileRef = 57FBBF8C7EF27C8E09126ED5 /* ServicesMenu.strings */; };
-		41B27CACD7C6C7471EFD03F9 /* UpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 022D0EAEE2B6E54069FC2CBE /* UpdateService.swift */; };
 		47C5ECD49C4DD75F271DB6CE /* StringNormalization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D3AC5F17D7CA94FAB1E8D7A /* StringNormalization.swift */; };
 		48D1431A7C99C19EEBDB056B /* CleaningEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8DE5D45BA19E2670B57DC5 /* CleaningEngine.swift */; };
 		4D33329ABDA67E35B3FC5B85 /* SimilarPhotoFinder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B97348789EA68B1ABADB1421 /* SimilarPhotoFinder.swift */; };
@@ -97,7 +95,6 @@
 		E60B0A2C5D0A6CAE35BF4DFB /* Locations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77D3D9A9BC52839E6D0A22BC /* Locations.swift */; };
 		E69ECB1F931950E9DE5BE251 /* PerformanceInspector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8619CA3ECD70CBBC96475C /* PerformanceInspector.swift */; };
 		E726702EABBE56155861DBA9 /* AppLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BB0904726B38DEB141BECA /* AppLanguage.swift */; };
-		E92B2068E8D0A381A2F10D72 /* AppUpdateSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312E528C94C7302138EFA9DE /* AppUpdateSettingsView.swift */; };
 		EDEF28CAD23E936FBED1783B /* PureMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63581B70F9B10231964E3602 /* PureMacApp.swift */; };
 		F1908A8EFDD078AB512425B9 /* AppleFeatureCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62BA83A253E17A3C61060556 /* AppleFeatureCatalogTests.swift */; };
 		F1F506C146E17D6CEC4A12F3 /* AppInfoFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23486A54A82EE3865B784D1C /* AppInfoFetcher.swift */; };
@@ -120,7 +117,6 @@
 
 /* Begin PBXFileReference section */
 		01B2C5F66B6D812572BD4F05 /* CLI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLI.swift; sourceTree = "<group>"; };
-		022D0EAEE2B6E54069FC2CBE /* UpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateService.swift; sourceTree = "<group>"; };
 		02E502E2B5C6AECC76E5CFEF /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		043F28E28FB7B2D9E39E5F70 /* PerformanceInspectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceInspectorTests.swift; sourceTree = "<group>"; };
 		04F5D30AEC87F2213C8D59AD /* XcodeBuildMCPDerivedDataSupportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XcodeBuildMCPDerivedDataSupportTests.swift; sourceTree = "<group>"; };
@@ -148,7 +144,6 @@
 		2D3F9FEDC493A8E49E910F67 /* AppBundleDragHandle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppBundleDragHandle.swift; sourceTree = "<group>"; };
 		3006DF98485FFC3C40308A22 /* AppleStorageServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleStorageServiceTests.swift; sourceTree = "<group>"; };
 		311078221878708524283765 /* PureMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PureMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		312E528C94C7302138EFA9DE /* AppUpdateSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdateSettingsView.swift; sourceTree = "<group>"; };
 		340D303C60FF878B019056B6 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3667D46D8E2004EB4D73835A /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		374A3BE46E71E54B6927E9EF /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/ServicesMenu.strings; sourceTree = "<group>"; };
@@ -198,7 +193,6 @@
 		8D5E63D733D1A3BDEDF4DCA5 /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		8F97E4CB93302BFE911DB1FF /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		8F9E767232924C819946DAAC /* AppleStorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleStorageService.swift; sourceTree = "<group>"; };
-		90D25BB11E61105B8764009E /* UpdateServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateServiceTests.swift; sourceTree = "<group>"; };
 		913E3064AA9BD7BE94A315CF /* MenuBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarController.swift; sourceTree = "<group>"; };
 		92259B3E9F4468865F15DEEC /* AppearancePill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearancePill.swift; sourceTree = "<group>"; };
 		95DCCE76F044F71BCBD8CE0C /* AppleFeaturesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleFeaturesView.swift; sourceTree = "<group>"; };
@@ -283,7 +277,6 @@
 				C7D81BE7EA5DB17F4A0300AD /* SimulatorRuntimeSupportTests.swift */,
 				78B8E84105970F69BBAB638F /* StorageExplorerTests.swift */,
 				55CE234DB2DB54ED53A4EFD6 /* ThemeManagerTests.swift */,
-				90D25BB11E61105B8764009E /* UpdateServiceTests.swift */,
 				04F5D30AEC87F2213C8D59AD /* XcodeBuildMCPDerivedDataSupportTests.swift */,
 			);
 			path = PureMacTests;
@@ -363,7 +356,6 @@
 				B97348789EA68B1ABADB1421 /* SimilarPhotoFinder.swift */,
 				8CF68B6BB9ED70387DF56728 /* StorageExplorer.swift */,
 				DB798781B99987F55D77E2E3 /* SystemMonitor.swift */,
-				022D0EAEE2B6E54069FC2CBE /* UpdateService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -371,7 +363,6 @@
 		7BC68AB045DA6E5299FD3CB6 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
-				312E528C94C7302138EFA9DE /* AppUpdateSettingsView.swift */,
 				3A8D39C3C250F26302EC45AB /* SettingsView.swift */,
 			);
 			path = Settings;
@@ -612,7 +603,6 @@
 				9BB5AAA574AFED6C27A3F8E2 /* AppPathFinder.swift in Sources */,
 				9AA80E035DF7B33F6EE118DF /* AppState.swift in Sources */,
 				535B23C0108C06475215B8E8 /* AppTheme.swift in Sources */,
-				E92B2068E8D0A381A2F10D72 /* AppUpdateSettingsView.swift in Sources */,
 				C85B54037A5989A85968F328 /* AppUpdatesView.swift in Sources */,
 				95278ABDCF5F4D6AC60503B1 /* AppearancePill.swift in Sources */,
 				7026A36B071FDFE87CF5B1BD /* AppleFeature.swift in Sources */,
@@ -672,7 +662,6 @@
 				DBFD73E3D9BDA74EC1CA56AB /* SystemMonitor.swift in Sources */,
 				340E424F759ACCDE7372F99F /* Theme.swift in Sources */,
 				6D449325D54B9850FC6C119F /* UniversalBinaryScanner.swift in Sources */,
-				41B27CACD7C6C7471EFD03F9 /* UpdateService.swift in Sources */,
 				0E0A5149C01BA4B013F85E2D /* XcodeBuildMCPDerivedDataSupport.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -703,7 +692,6 @@
 				F4F02F966001A1504C2B4D33 /* SimulatorRuntimeSupportTests.swift in Sources */,
 				10959A68B277AEF7D2442C48 /* StorageExplorerTests.swift in Sources */,
 				ABE3B80279483DB90B8EC1BC /* ThemeManagerTests.swift in Sources */,
-				27673871ECFD189E98548956 /* UpdateServiceTests.swift in Sources */,
 				BF1DAD05E70EB1AE0103BFEA /* XcodeBuildMCPDerivedDataSupportTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
