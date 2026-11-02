@@ -32,9 +32,14 @@ struct MainWindow: View {
             sidebar
                 .navigationSplitViewColumnWidth(min: 232, ideal: 248, max: 288)
         } detail: {
-            detailContainer
+            // A floor for pages that would squeeze to letter soup. .frame(minWidth:) would replace a wider page's own
+            // minimum and clip it, while this takes the larger of the two.
+            ZStack {
+                Color.clear.frame(minWidth: 360)
+                detailContainer
+            }
         }
-        .frame(minWidth: 960, minHeight: 640)
+        .frame(minHeight: 640)
         .tint(Tint.accent)
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             appState.checkFullDiskAccess()

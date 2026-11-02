@@ -125,8 +125,17 @@ struct PerformanceView: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            Button("Open Activity Monitor") {
-                openActivityMonitor()
+            ViewThatFits(in: .horizontal) {
+                Button("Open Activity Monitor") {
+                    openActivityMonitor()
+                }
+                Button {
+                    openActivityMonitor()
+                } label: {
+                    Image(systemName: "arrow.up.forward.app")
+                }
+                .help("Open Activity Monitor")
+                .accessibilityLabel("Open Activity Monitor")
             }
             .buttonStyle(.bordered)
         }
@@ -317,6 +326,8 @@ struct PerformanceView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Local snapshots")
                             .font(.system(size: 15, weight: .semibold))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
                         Text("Time Machine snapshots can be reviewed and removed individually")
                             .font(.system(size: 11.5))
                             .foregroundStyle(.secondary)

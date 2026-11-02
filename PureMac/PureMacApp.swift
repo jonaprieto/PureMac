@@ -101,7 +101,6 @@ struct PureMacApp: App {
                 if onboardingComplete {
                     MainWindow()
                         .environmentObject(appState)
-                        .frame(minWidth: 960, minHeight: 640)
                 } else {
                     OnboardingView(isComplete: $onboardingComplete)
                 }
