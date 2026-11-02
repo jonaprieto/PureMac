@@ -44,6 +44,20 @@ struct StorageScanResult: Sendable {
 
     var scannedItemCount: Int { fileCount + directoryCount }
     var isPartial: Bool { inaccessibleCount > 0 || skippedCount > 0 }
+
+    /// This result without a top-level entry, so a removal needs no rescan.
+    func removing(_ entry: StorageEntry) -> StorageScanResult {
+        guard entries.contains(entry) else { return self }
+        return StorageScanResult(
+            rootURL: rootURL,
+            entries: entries.filter { $0 != entry },
+            totalAllocatedSize: totalAllocatedSize - entry.allocatedSize,
+            fileCount: fileCount - entry.fileCount,
+            directoryCount: directoryCount - entry.directoryCount,
+            inaccessibleCount: inaccessibleCount - entry.inaccessibleCount,
+            skippedCount: skippedCount - entry.skippedCount
+        )
+    }
 }
 
 enum StorageExplorerError: LocalizedError, Equatable {
@@ -52,6 +66,7 @@ enum StorageExplorerError: LocalizedError, Equatable {
     case package(String)
     case cloudOnly(String)
     case unavailable(String)
+    case protected(String)
 
     var errorDescription: String? {
         switch self {
@@ -65,6 +80,8 @@ enum StorageExplorerError: LocalizedError, Equatable {
             return String(localized: "The selected folder is stored in the cloud and has not been downloaded: \(path)")
         case .unavailable(let path):
             return String(localized: "The selected folder could not be read: \(path)")
+        case .protected(let path):
+            return String(localized: "This item is protected and can't be moved to Trash: \(path)")
         }
     }
 }
@@ -198,6 +215,22 @@ actor StorageExplorer {
             inaccessibleCount: context.inaccessibleCount,
             skippedCount: context.skippedCount
         )
+    }
+
+    func moveToTrash(_ entry: StorageEntry) throws {
+        let url = entry.url.standardizedFileURL
+        guard !Self.isProtected(url) else { throw StorageExplorerError.protected(url.path) }
+        try FileManager.default.trashItem(at: url, resultingItemURL: nil)
+    }
+
+    /// The Trash is recoverable, but not once it takes the session down with it: the home folder, anything holding it,
+    /// and ~/Library stay put, as does whatever macOS itself protects. High-risk dotfolders are allowed on purpose: here
+    /// the user picks the item by hand, and ~/.cargo-sized folders are what this tool is for.
+    static func isProtected(_ url: URL) -> Bool {
+        let path = url.standardizedFileURL.path
+        let home = FileManager.default.homeDirectoryForCurrentUser.standardizedFileURL.path
+        return path == home || home.hasPrefix(path.hasSuffix("/") ? path : path + "/") || path == "\(home)/Library"
+            || FileProtection.isProtectedFromDeletion(path: path)
     }
 
     private func measure(

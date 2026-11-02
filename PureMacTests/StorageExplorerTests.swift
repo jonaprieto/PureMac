@@ -127,6 +127,36 @@ final class StorageExplorerTests: XCTestCase {
         }
     }
 
+    func testRemovingEntryDropsItFromTotals() async throws {
+        let nested = temporaryRoot.appendingPathComponent("Nested", isDirectory: true)
+        try FileManager.default.createDirectory(at: nested, withIntermediateDirectories: true)
+        try Data(repeating: 0x41, count: 1_200_000)
+            .write(to: nested.appendingPathComponent("large.bin"), options: .withoutOverwriting)
+        try Data(repeating: 0x42, count: 8_000)
+            .write(to: temporaryRoot.appendingPathComponent("small.bin"), options: .withoutOverwriting)
+        let result = try await StorageExplorer().scan(at: temporaryRoot)
+        let removed = try XCTUnwrap(result.entries.first { $0.name == "Nested" })
+        let kept = try XCTUnwrap(result.entries.first { $0.name == "small.bin" })
+
+        let updated = result.removing(removed)
+
+        XCTAssertEqual(updated.entries, [kept])
+        XCTAssertEqual(updated.totalAllocatedSize, kept.allocatedSize)
+        XCTAssertEqual(updated.fileCount, 1)
+        XCTAssertEqual(updated.directoryCount, 0)
+        // A removal that lands after navigating elsewhere must not touch that folder's result.
+        XCTAssertEqual(updated.removing(removed).totalAllocatedSize, updated.totalAllocatedSize)
+    }
+
+    func testProtectsHomeItsParentsAndLibraryButNotOrdinaryItems() throws {
+        let home = FileManager.default.homeDirectoryForCurrentUser
+        for url in [home, home.deletingLastPathComponent(), URL(fileURLWithPath: "/"), home.appendingPathComponent("Library")] {
+            XCTAssertTrue(StorageExplorer.isProtected(url), url.path)
+        }
+        XCTAssertFalse(StorageExplorer.isProtected(home.appendingPathComponent(".cargo")))
+        XCTAssertFalse(StorageExplorer.isProtected(temporaryRoot))
+    }
+
     func testRejectsSymbolicLinkAsScanRoot() async throws {
         let target = temporaryRoot.appendingPathComponent("Target", isDirectory: true)
         let link = temporaryRoot.appendingPathComponent("Target Link")
