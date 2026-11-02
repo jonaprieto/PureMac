@@ -24,6 +24,40 @@ final class WindowOpener {
     private init() {}
 }
 
+/// macOS keeps one real status button and draws a copy of it in every other menu bar, and it moves that button between
+/// displays as the active one changes, taking an attached popover along. A click on a copy still reaches the button, so
+/// the popover anchors here instead, on the display that was clicked.
+@MainActor
+final class PopoverAnchor {
+    private lazy var window: NSPanel = {
+        let panel = NSPanel(
+            contentRect: NSRect(x: 0, y: 0, width: 1, height: 1),
+            styleMask: [.borderless, .nonactivatingPanel],
+            backing: .buffered,
+            defer: false
+        )
+        panel.isOpaque = false
+        panel.backgroundColor = .clear
+        panel.ignoresMouseEvents = true
+        panel.level = .statusBar
+        panel.collectionBehavior = [.canJoinAllSpaces, .ignoresCycle]
+        return panel
+    }()
+
+    func view(for button: NSView, click: NSPoint = NSEvent.mouseLocation) -> NSView {
+        // NSMouseInRect because a menu-bar click sits on the screen's top edge, which NSRect.contains leaves out.
+        guard let screen = NSScreen.screens.first(where: { NSMouseInRect(click, $0.frame, false) }),
+              let anchor = window.contentView else { return button }
+        window.setFrameTopLeftPoint(NSPoint(x: click.x, y: screen.visibleFrame.maxY))
+        window.orderFront(nil)
+        return anchor
+    }
+
+    func hide() {
+        window.orderOut(nil)
+    }
+}
+
 /// AppKit-backed menu-bar system monitor. A SwiftUI `MenuBarExtra` was avoided
 /// here: a conditional `.window`-style `MenuBarExtra` fails to type-check, and
 /// an unconditional one stalls the XCTest host's run loop. An `NSStatusItem`
@@ -33,6 +67,7 @@ final class WindowOpener {
 final class MenuBarController: NSObject, NSPopoverDelegate {
     private let statusItem: NSStatusItem
     private let popover = NSPopover()
+    private let anchor = PopoverAnchor()
     private let monitor = SystemMonitor.shared
     private let monitorOwner = UUID()
     private var cancellable: AnyCancellable?
@@ -61,7 +96,9 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
 
         popover.behavior = .transient
         popover.contentSize = NSSize(width: 248, height: 230)
-        popover.contentViewController = NSHostingController(rootView: MenuBarMonitorView())
+        let content = NSHostingController(rootView: MenuBarMonitorView())
+        content.sizingOptions = .preferredContentSize
+        popover.contentViewController = content
         popover.delegate = self
 
         // Refresh the menu-bar CPU readout each time the monitor samples.
@@ -92,8 +129,13 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
             popover.performClose(nil)
         } else {
             NSApp.activate(ignoringOtherApps: true)
-            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            let view = anchor.view(for: button)
+            popover.show(relativeTo: view.bounds, of: view, preferredEdge: .minY)
             popover.contentViewController?.view.window?.makeKey()
         }
+    }
+
+    func popoverDidClose(_ notification: Notification) {
+        anchor.hide()
     }
 }

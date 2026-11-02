@@ -3,6 +3,27 @@ import XCTest
 
 @MainActor
 final class MonitoringLifecycleTests: XCTestCase {
+    func testPopoverAnchorFollowsTheClickToItsDisplay() throws {
+        let screens = NSScreen.screens
+        let home = try XCTUnwrap(screens.first)
+        let window = NSWindow(
+            contentRect: NSRect(x: home.frame.midX, y: home.frame.midY, width: 40, height: 20),
+            styleMask: .borderless,
+            backing: .buffered,
+            defer: false
+        )
+        let button = NSView()
+        window.contentView = button
+        let anchor = PopoverAnchor()
+        defer { anchor.hide() }
+
+        XCTAssertTrue(anchor.view(for: button, click: NSPoint(x: -1_000_000, y: -1_000_000)) === button)
+        for screen in screens {
+            let clicked = anchor.view(for: button, click: NSPoint(x: screen.frame.midX, y: screen.frame.maxY))
+            XCTAssertEqual(clicked.window?.screen, screen)
+        }
+    }
+
     func testRepeatedActivationDoesNotLeakSubscriptionsAndLastOwnerStopsSampling() {
         var samples = 0
         let monitor = SystemMonitor(sampleAction: { samples += 1 })
