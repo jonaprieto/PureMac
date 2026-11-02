@@ -144,80 +144,93 @@ struct DashboardView: View {
             diskOverview
             scanIntroduction
 
-            HStack(alignment: .top, spacing: 16) {
-                VStack(alignment: .leading, spacing: 10) {
-                    dashboardSection("Storage")
-                    CardSurface(padding: 0, elevation: .flat) {
-                        VStack(spacing: 0) {
-                            DashboardToolCard(
-                                title: "Space Explorer",
-                                detail: "Browse folders by size",
-                                icon: "square.3.layers.3d.down.right",
-                                tint: Tint.accent
-                            ) { onNavigate(.spaceExplorer) }
-                            Divider().padding(.leading, 46)
-                            DashboardToolCard(
-                                title: "Duplicate Finder",
-                                detail: "Review files with identical contents",
-                                icon: "doc.on.doc",
-                                tint: Tint.accent
-                            ) { onNavigate(.duplicates) }
-                            Divider().padding(.leading, 46)
-                            DashboardToolCard(
-                                title: "Similar Photos",
-                                detail: "Compare possible matches",
-                                icon: "photo.stack",
-                                tint: Tint.accent
-                            ) { onNavigate(.similarPhotos) }
-                        }
-                    }
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .top, spacing: 16) {
+                    storageTools
+                    systemTools
                 }
-                .frame(maxWidth: .infinity, alignment: .topLeading)
-
-                VStack(alignment: .leading, spacing: 10) {
-                    dashboardSection("Applications & system")
-                    CardSurface(padding: 0, elevation: .flat) {
-                        VStack(spacing: 0) {
-                            DashboardToolCard(
-                                title: "Apple Features",
-                                detail: "Review Siri, image creation, and extras",
-                                icon: "switch.2",
-                                tint: Tint.accent
-                            ) { onNavigate(.appleFeatures) }
-                            Divider().padding(.leading, 46)
-                            DashboardToolCard(
-                                title: "Uninstaller",
-                                detail: "Remove apps and related files",
-                                icon: "app.dashed",
-                                tint: Tint.accent
-                            ) { onNavigate(.apps) }
-                            Divider().padding(.leading, 46)
-                            DashboardToolCard(
-                                title: "App Updates",
-                                detail: "Check Homebrew-managed apps",
-                                icon: "arrow.triangle.2.circlepath",
-                                tint: Tint.accent
-                            ) { onNavigate(.appUpdates) }
-                            Divider().padding(.leading, 46)
-                            DashboardToolCard(
-                                title: "Protection",
-                                detail: "Check macOS security settings",
-                                icon: "shield.checkered",
-                                tint: Tint.accent
-                            ) { onNavigate(.protection) }
-                            Divider().padding(.leading, 46)
-                            DashboardToolCard(
-                                title: "Performance",
-                                detail: "View processes and startup items",
-                                icon: "gauge.with.dots.needle.67percent",
-                                tint: Tint.accent
-                            ) { onNavigate(.performance) }
-                        }
-                    }
+                VStack(alignment: .leading, spacing: 20) {
+                    storageTools
+                    systemTools
                 }
-                .frame(maxWidth: .infinity, alignment: .topLeading)
             }
         }
+    }
+
+    private var storageTools: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            dashboardSection("Storage")
+            CardSurface(padding: 0, elevation: .flat) {
+                VStack(spacing: 0) {
+                    DashboardToolCard(
+                        title: "Space Explorer",
+                        detail: "Browse folders by size",
+                        icon: "square.3.layers.3d.down.right",
+                        tint: Tint.accent
+                    ) { onNavigate(.spaceExplorer) }
+                    Divider().padding(.leading, 46)
+                    DashboardToolCard(
+                        title: "Duplicate Finder",
+                        detail: "Review files with identical contents",
+                        icon: "doc.on.doc",
+                        tint: Tint.accent
+                    ) { onNavigate(.duplicates) }
+                    Divider().padding(.leading, 46)
+                    DashboardToolCard(
+                        title: "Similar Photos",
+                        detail: "Compare possible matches",
+                        icon: "photo.stack",
+                        tint: Tint.accent
+                    ) { onNavigate(.similarPhotos) }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+    }
+
+    private var systemTools: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            dashboardSection("Applications & system")
+            CardSurface(padding: 0, elevation: .flat) {
+                VStack(spacing: 0) {
+                    DashboardToolCard(
+                        title: "Apple Features",
+                        detail: "Review Siri, image creation, and extras",
+                        icon: "switch.2",
+                        tint: Tint.accent
+                    ) { onNavigate(.appleFeatures) }
+                    Divider().padding(.leading, 46)
+                    DashboardToolCard(
+                        title: "Uninstaller",
+                        detail: "Remove apps and related files",
+                        icon: "app.dashed",
+                        tint: Tint.accent
+                    ) { onNavigate(.apps) }
+                    Divider().padding(.leading, 46)
+                    DashboardToolCard(
+                        title: "App Updates",
+                        detail: "Check Homebrew-managed apps",
+                        icon: "arrow.triangle.2.circlepath",
+                        tint: Tint.accent
+                    ) { onNavigate(.appUpdates) }
+                    Divider().padding(.leading, 46)
+                    DashboardToolCard(
+                        title: "Protection",
+                        detail: "Check macOS security settings",
+                        icon: "shield.checkered",
+                        tint: Tint.accent
+                    ) { onNavigate(.protection) }
+                    Divider().padding(.leading, 46)
+                    DashboardToolCard(
+                        title: "Performance",
+                        detail: "View processes and startup items",
+                        icon: "gauge.with.dots.needle.67percent",
+                        tint: Tint.accent
+                    ) { onNavigate(.performance) }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 
     private var scanIntroduction: some View {
@@ -286,30 +299,9 @@ struct DashboardView: View {
                 )
                 .accessibilityHidden(true)
 
-                HStack(spacing: 24) {
-                    diskLegendRow(
-                        id: "used",
-                        color: Color.primary.opacity(0.56),
-                        label: "Used",
-                        value: ByteCountFormatter.string(
-                            fromByteCount: max(0, appState.diskInfo.usedSpace - appState.diskInfo.purgeableSpace),
-                            countStyle: .file
-                        )
-                    )
-                    if appState.diskInfo.purgeableSpace > 0 {
-                        diskLegendRow(
-                            id: "purgeable",
-                            color: Tint.cyan,
-                            label: "Purgeable",
-                            value: appState.diskInfo.formattedPurgeable
-                        )
-                    }
-                    diskLegendRow(
-                        id: "free",
-                        color: Tint.accent,
-                        label: "Available",
-                        value: appState.diskInfo.formattedFree
-                    )
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 24) { diskLegendRows }
+                    VStack(spacing: 6) { diskLegendRows }
                 }
 
                 if appState.diskInfo.purgeableSpace > 0 {
@@ -319,6 +311,33 @@ struct DashboardView: View {
                 }
             }
         }
+    }
+
+    @ViewBuilder
+    private var diskLegendRows: some View {
+        diskLegendRow(
+            id: "used",
+            color: Color.primary.opacity(0.56),
+            label: "Used",
+            value: ByteCountFormatter.string(
+                fromByteCount: max(0, appState.diskInfo.usedSpace - appState.diskInfo.purgeableSpace),
+                countStyle: .file
+            )
+        )
+        if appState.diskInfo.purgeableSpace > 0 {
+            diskLegendRow(
+                id: "purgeable",
+                color: Tint.cyan,
+                label: "Purgeable",
+                value: appState.diskInfo.formattedPurgeable
+            )
+        }
+        diskLegendRow(
+            id: "free",
+            color: Tint.accent,
+            label: "Available",
+            value: appState.diskInfo.formattedFree
+        )
     }
 
     private func diskLegendRow(id: String, color: Color, label: LocalizedStringKey, value: String) -> some View {

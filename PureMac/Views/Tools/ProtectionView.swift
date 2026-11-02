@@ -48,6 +48,8 @@ struct ProtectionView: View {
             VStack(alignment: .leading, spacing: 7) {
                 Text("Protection")
                     .font(.system(size: 28, weight: .bold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
                 Text("Review the macOS safeguards that protect apps, disks, network access, and system files.")
                     .font(.system(size: 13))
                     .foregroundStyle(.secondary)
