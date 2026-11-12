@@ -958,6 +958,8 @@ final class AppState: ObservableObject {
         let itemsToClean = allResults.flatMap { $0.items }.filter { item in
             guard itemIDs?.contains(item.id) ?? true else { return false }
             guard isItemSelected(item) else { return false }
+            // Worktrees are only ever removed by hand, never on a schedule.
+            if scheduled && item.category == .gitWorktrees { return false }
             if scheduled && XcodeBuildMCPDerivedDataSupport.isManagedDerivedDataPath(item.path) {
                 // Scheduled XcodeBuildMCP cleanup is intentionally stricter
                 // than ordinary Xcode Junk: only old, unlocked rows qualify.

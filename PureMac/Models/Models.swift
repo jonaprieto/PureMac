@@ -15,6 +15,8 @@ enum CleaningCategory: String, CaseIterable, Identifiable, Codable {
     case brewCache = "Brew Cache"
     case nodeCache = "Node Cache"
     case dockerCache = "Docker Cache"
+    case buildCaches = "Build Caches"
+    case gitWorktrees = "Stale Worktrees"
     case universalBinaries = "Universal Binaries"
     case languageFiles = "Language Files"
 
@@ -34,6 +36,8 @@ enum CleaningCategory: String, CaseIterable, Identifiable, Codable {
         case .brewCache: return "mug.fill"
         case .nodeCache: return "leaf.fill"
         case .dockerCache: return "shippingbox.fill"
+        case .buildCaches: return "archivebox.fill"
+        case .gitWorktrees: return "arrow.triangle.branch"
         case .universalBinaries: return "cpu"
         case .languageFiles: return "globe"
         }
@@ -53,6 +57,8 @@ enum CleaningCategory: String, CaseIterable, Identifiable, Codable {
         case .brewCache: return "Homebrew download cache"
         case .nodeCache: return "npm, yarn, and pnpm download caches"
         case .dockerCache: return "Docker images, containers, and build cache"
+        case .buildCaches: return "Cargo, Lean, uv, and project build outputs that rebuild on demand"
+        case .gitWorktrees: return "Clean git worktrees with nothing left to lose"
         case .universalBinaries: return "Unused CPU architecture slices in app binaries"
         case .languageFiles: return "Unused app localizations"
         }
@@ -72,6 +78,8 @@ enum CleaningCategory: String, CaseIterable, Identifiable, Codable {
         case .brewCache: return .mint
         case .nodeCache: return .pink
         case .dockerCache: return .indigo
+        case .buildCaches: return .orange
+        case .gitWorktrees: return .green
         case .universalBinaries: return .brown
         case .languageFiles: return .gray
         }

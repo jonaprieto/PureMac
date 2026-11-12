@@ -112,6 +112,22 @@ actor CleaningEngine {
                 continue
             }
 
+            if item.category == .gitWorktrees {
+                // `git worktree remove` (no --force) refuses dirty, locked or
+                // main worktrees, which re-checks the scan at delete time, and
+                // it clears the repo's worktree metadata a plain unlink leaves.
+                let removeOutcome = await removeGitWorktree(item)
+                if removeOutcome.cleaned {
+                    result.freedSpace += item.size
+                    result.itemsCleaned += 1
+                    result.cleanedPaths.insert(item.path)
+                }
+                if let error = removeOutcome.error {
+                    result.errors.append(error)
+                }
+                continue
+            }
+
             if let runtimeID = item.simctlRuntimeIdentifier {
                 // Simulator runtimes live in CoreSimulator's secure storage;
                 // deleting the mount path by hand leaves orphaned disk images.
@@ -225,8 +241,8 @@ actor CleaningEngine {
                     (nsError.domain == NSPOSIXErrorDomain &&
                         (nsError.code == Int(EACCES) || nsError.code == Int(EPERM)))
                 if isPermissionDenied {
-                    if item.category == .aiApps {
-                        let detail = "AI app cleanup requires access as the current user: \(item.path)"
+                    if item.category == .aiApps || item.category == .buildCaches {
+                        let detail = "\(item.category == .aiApps ? "AI app" : "Build cache") cleanup requires access as the current user: \(item.path)"
                         result.errors.append(detail)
                         Logger.shared.log(detail, level: .warning)
                         continue
@@ -285,8 +301,8 @@ actor CleaningEngine {
         // refuses to escalate.
         let exclusions = CleanupExclusions.paths()
         let validated: [(item: CleanableItem, resolved: String)] = items.compactMap { item in
-            guard item.category != .aiApps else {
-                result.errors.append("Administrator cleanup is unavailable for AI app data: \(item.name)")
+            guard item.category != .aiApps, item.category != .buildCaches else {
+                result.errors.append("Administrator cleanup is unavailable for \(item.category == .aiApps ? "AI app" : "build cache") data: \(item.name)")
                 return nil
             }
             guard !CleanupExclusions.excludes(item.path, paths: exclusions) else { return nil }
@@ -468,6 +484,38 @@ actor CleaningEngine {
         return (0, nil)
     }
 
+    // MARK: - Git Worktrees
+
+    private func removeGitWorktree(_ item: CleanableItem) async -> (cleaned: Bool, error: String?) {
+        let path = item.path
+        guard path == (path as NSString).standardizingPath,
+              path.hasPrefix(homeDirectory.path + "/"),
+              !hasUnexpectedSymlink(in: path) else {
+            return (false, "Skipped symlink or unsafe path: \(path)")
+        }
+        guard fileManager.fileExists(atPath: path) else { return (true, nil) }
+        guard let git = DevCacheSupport.gitExecutable(fileManager: fileManager) else {
+            return (false, "git not found, install Xcode command-line tools or Homebrew git")
+        }
+        do {
+            let result = try await BrewProcessRunner.run(
+                executableURL: URL(fileURLWithPath: git),
+                arguments: ["-C", path, "worktree", "remove", path],
+                timeout: 60,
+                environment: DevCacheSupport.gitEnvironment
+            )
+            guard result.status == 0 else {
+                let stderr = String(data: result.stderr, encoding: .utf8)?
+                    .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                Logger.shared.log("git worktree remove \(path) failed: \(stderr)", level: .warning)
+                return (false, "Kept worktree \(item.name): \(stderr.isEmpty ? "git refused to remove it" : stderr)")
+            }
+            return (true, nil)
+        } catch {
+            return (false, "Couldn't run git worktree remove for \(item.name): \(error.localizedDescription)")
+        }
+    }
+
     // MARK: - Simulator Runtimes
 
     /// Deletes one simulator runtime disk image via
@@ -579,6 +627,13 @@ actor CleaningEngine {
     ) -> Bool {
         if item.category == .aiApps {
             return item.path == resolvedPath && isSupportedAIAppPath(resolvedPath)
+        }
+        if item.category == .buildCaches {
+            return item.path == resolvedPath && DevCacheSupport.isRemovableBuildCache(
+                resolvedPath,
+                home: homeDirectory.path,
+                fileManager: fileManager
+            )
         }
         let originalIsManaged = XcodeBuildMCPDerivedDataSupport.isManagedDerivedDataPath(
             item.path,

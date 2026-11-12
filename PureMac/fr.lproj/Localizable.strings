@@ -276,6 +276,10 @@
 "Homebrew download cache" = "Cache de téléchargement Homebrew";
 "npm, yarn, and pnpm download caches" = "Caches de téléchargement npm, yarn et pnpm";
 "Docker images, containers, and build cache" = "Images, conteneurs et cache de build Docker";
+"Build Caches" = "Build Caches";
+"Stale Worktrees" = "Stale Worktrees";
+"Cargo, Lean, uv, and project build outputs that rebuild on demand" = "Cargo, Lean, uv, and project build outputs that rebuild on demand";
+"Clean git worktrees with nothing left to lose" = "Clean git worktrees with nothing left to lose";
 
 /* Node Cache subcategories */
 "npm cache" = "Cache npm";

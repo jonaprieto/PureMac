@@ -251,6 +251,10 @@
 "Homebrew download cache" = "Homebrewのダウンロードキャッシュ";
 "npm, yarn, and pnpm download caches" = "npm、yarn、pnpm のダウンロードキャッシュ";
 "Docker images, containers, and build cache" = "Dockerイメージ、コンテナ、ビルドキャッシュ";
+"Build Caches" = "Build Caches";
+"Stale Worktrees" = "Stale Worktrees";
+"Cargo, Lean, uv, and project build outputs that rebuild on demand" = "Cargo, Lean, uv, and project build outputs that rebuild on demand";
+"Clean git worktrees with nothing left to lose" = "Clean git worktrees with nothing left to lose";
 "Unused CPU architecture slices in app binaries" = "アプリバイナリ内の未使用CPUアーキテクチャコード";
 "Unused app localizations" = "使用されていないアプリのローカライゼーション";
 

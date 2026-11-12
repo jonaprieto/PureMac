@@ -77,6 +77,10 @@ actor ScanEngine {
             return await scanNodeCache()
         case .dockerCache:
             return await scanDockerCache()
+        case .buildCaches:
+            return scanBuildCaches()
+        case .gitWorktrees:
+            return await scanGitWorktrees()
         case .universalBinaries:
             return scanUniversalBinaries()
         case .languageFiles:
@@ -821,6 +825,112 @@ actor ScanEngine {
         }
     }
 
+    private func scanBuildCaches() -> CategoryResult {
+        var items: [CleanableItem] = []
+        for cache in DevCacheSupport.globalCaches(home: home) {
+            guard fileManager.fileExists(atPath: cache.path) else { continue }
+            report(cache.path)
+            let size = directorySize(path: cache.path, skipsHidden: false)
+            guard size > 1024 else { continue }
+            items.append(CleanableItem(
+                name: cache.name,
+                path: cache.path,
+                size: size,
+                category: .buildCaches,
+                isSelected: true,
+                lastModified: nil
+            ))
+        }
+
+        // Per-project build outputs rebuild fine but can take a while
+        // (a Lean project may need `lake exe cache get` plus a build), so
+        // they are opt-in.
+        let projects = DevCacheSupport.scanProjects(home: home, fileManager: fileManager) { report($0) }
+        for path in projects.buildDirs {
+            if Task.isCancelled { break }
+            let size = directorySize(path: path, skipsHidden: false)
+            guard size > 1024 * 1024 else { continue }
+            let url = URL(fileURLWithPath: path)
+            items.append(CleanableItem(
+                name: "\(url.deletingLastPathComponent().lastPathComponent)/\(url.lastPathComponent)",
+                path: path,
+                size: size,
+                category: .buildCaches,
+                isSelected: false,
+                lastModified: fileModDate(path: path)
+            ))
+        }
+
+        let totalSize = items.reduce(0) { $0 + $1.size }
+        return CategoryResult(category: .buildCaches, items: items, totalSize: totalSize)
+    }
+
+    /// Linked worktrees with a clean tree whose HEAD is still reachable after
+    /// removal (it has a branch, or another ref contains it). `git worktree
+    /// remove` keeps the branch, so removing one loses only the checkout.
+    private func scanGitWorktrees() async -> CategoryResult {
+        var items: [CleanableItem] = []
+        guard let git = DevCacheSupport.gitExecutable(fileManager: fileManager) else {
+            return CategoryResult(category: .gitWorktrees, items: [], totalSize: 0)
+        }
+        let env = DevCacheSupport.gitEnvironment
+        func runGit(_ args: [String]) async -> String? {
+            guard let result = try? await BrewProcessRunner.run(
+                executableURL: URL(fileURLWithPath: git),
+                arguments: args,
+                timeout: 20,
+                environment: env
+            ), result.status == 0 else { return nil }
+            return String(data: result.stdout, encoding: .utf8)
+        }
+
+        var seen = Set<String>()
+        for repo in DevCacheSupport.scanProjects(home: home, fileManager: fileManager, onPath: { report($0) }).repos {
+            if Task.isCancelled { break }
+            guard let listing = await runGit(["-C", repo, "worktree", "list", "--porcelain"]) else { continue }
+            for worktree in DevCacheSupport.parseWorktreeList(listing) {
+                let path = worktree.path
+                guard seen.insert(path).inserted,
+                      path.hasPrefix(home + "/"),
+                      fileManager.fileExists(atPath: path) else { continue }
+                report(path)
+                // Read the index mtime before `git status`, which may rewrite it.
+                let lastUsed = worktreeIndexDate(path)
+                guard let status = await runGit(["-C", path, "status", "--porcelain"]),
+                      status.isEmpty else { continue }
+                if worktree.branch == nil {
+                    guard let refs = await runGit([
+                        "-C", path, "for-each-ref", "--contains", "HEAD", "--count=1",
+                        "--format=%(refname)", "refs/heads", "refs/remotes",
+                    ]), !refs.isEmpty else { continue }
+                }
+                let size = directorySize(path: path, skipsHidden: false)
+                let isStale = lastUsed.map { Date().timeIntervalSince($0) > DevCacheSupport.staleAfter } ?? false
+                items.append(CleanableItem(
+                    name: worktree.branch ?? URL(fileURLWithPath: path).lastPathComponent,
+                    path: path,
+                    size: size,
+                    category: .gitWorktrees,
+                    isSelected: isStale,
+                    lastModified: lastUsed
+                ))
+            }
+        }
+
+        let totalSize = items.reduce(0) { $0 + $1.size }
+        return CategoryResult(category: .gitWorktrees, items: items, totalSize: totalSize)
+    }
+
+    /// Modification date of a linked worktree's index, found through the
+    /// `gitdir: <path>` pointer in its `.git` file.
+    private func worktreeIndexDate(_ worktree: String) -> Date? {
+        guard let pointer = try? String(contentsOfFile: worktree + "/.git", encoding: .utf8),
+              pointer.hasPrefix("gitdir: ") else { return nil }
+        var gitDir = String(pointer.dropFirst("gitdir: ".count)).trimmingCharacters(in: .whitespacesAndNewlines)
+        if !gitDir.hasPrefix("/") { gitDir = worktree + "/" + gitDir }
+        return fileModDate(path: gitDir + "/index")
+    }
+
     private func scanDockerCache() async -> CategoryResult {
         var items: [CleanableItem] = []
 
@@ -1130,7 +1240,7 @@ actor ScanEngine {
         (path as NSString).standardizingPath
     }
 
-    private func directorySize(path: String) -> Int64 {
+    private func directorySize(path: String, skipsHidden: Bool = true) -> Int64 {
         var totalSize: Int64 = 0
 
         // errorHandler returns true so unreadable entries are skipped
@@ -1138,7 +1248,7 @@ actor ScanEngine {
         guard let enumerator = fileManager.enumerator(
             at: URL(fileURLWithPath: path),
             includingPropertiesForKeys: [.totalFileAllocatedSizeKey, .fileSizeKey, .isRegularFileKey],
-            options: [.skipsHiddenFiles],
+            options: skipsHidden ? [.skipsHiddenFiles] : [],
             errorHandler: { _, _ in true }
         ) else { return 0 }
 

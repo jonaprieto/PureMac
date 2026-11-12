@@ -251,6 +251,10 @@
 "Homebrew download cache" = "ذاكرة تنزيلات Homebrew المؤقتة";
 "npm, yarn, and pnpm download caches" = "ذاكرات تنزيلات npm وyarn وpnpm المؤقتة";
 "Docker images, containers, and build cache" = "صور Docker والحاويات وذاكرة البناء المؤقتة";
+"Build Caches" = "Build Caches";
+"Stale Worktrees" = "Stale Worktrees";
+"Cargo, Lean, uv, and project build outputs that rebuild on demand" = "Cargo, Lean, uv, and project build outputs that rebuild on demand";
+"Clean git worktrees with nothing left to lose" = "Clean git worktrees with nothing left to lose";
 "Unused CPU architecture slices in app binaries" = "شرائح بنى معالج غير مستخدمة في الملفات الثنائية للتطبيقات";
 "Unused app localizations" = "ترجمات التطبيقات غير المستخدمة";
 

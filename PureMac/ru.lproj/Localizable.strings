@@ -292,6 +292,10 @@
 "Homebrew download cache" = "Кэш загрузок Homebrew";
 "npm, yarn, and pnpm download caches" = "Кэши загрузок npm, yarn и pnpm";
 "Docker images, containers, and build cache" = "Образы и контейнеры Docker, а также кэш сборки";
+"Build Caches" = "Build Caches";
+"Stale Worktrees" = "Stale Worktrees";
+"Cargo, Lean, uv, and project build outputs that rebuild on demand" = "Cargo, Lean, uv, and project build outputs that rebuild on demand";
+"Clean git worktrees with nothing left to lose" = "Clean git worktrees with nothing left to lose";
 "Unused CPU architecture slices in app binaries" = "Неиспользуемые архитектуры процессора в бинарных файлах приложений";
 "Unused app localizations" = "Неиспользуемые локализации приложений";
 
